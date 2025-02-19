@@ -3,6 +3,8 @@
 import type React from "react"
 import { useRef, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { useDesktop } from "@/contexts/desktop-context"
+import { Save } from "lucide-react"
 
 const colors = [
   "#000000",
@@ -40,6 +42,7 @@ export default function Paint() {
   const [isDrawing, setIsDrawing] = useState(false)
   const [color, setColor] = useState("#000000")
   const [tool, setTool] = useState("brush")
+  const { addFile } = useDesktop()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -83,15 +86,35 @@ export default function Paint() {
     setIsDrawing(false)
   }
 
+  const saveDrawing = () => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      const dataUrl = canvas.toDataURL()
+      const name = `Drawing ${new Date().toLocaleString()}`
+      addFile({
+        name,
+        type: "drawing",
+        content: dataUrl,
+      })
+      alert("Drawing saved successfully!")
+    }
+  }
+
   return (
     <div className="bg-gray-200 border-2 border-black">
-      <div className="bg-gray-300 px-2 py-1 text-sm border-b-2 border-black">
-        <span className="mr-4">File</span>
-        <span className="mr-4">Edit</span>
-        <span className="mr-4">View</span>
-        <span className="mr-4">Image</span>
-        <span className="mr-4">Options</span>
-        <span>Help</span>
+      <div className="bg-gray-300 px-2 py-1 text-sm border-b-2 border-black flex justify-between items-center">
+        <div>
+          <span className="mr-4">File</span>
+          <span className="mr-4">Edit</span>
+          <span className="mr-4">View</span>
+          <span className="mr-4">Image</span>
+          <span className="mr-4">Options</span>
+          <span>Help</span>
+        </div>
+        <Button variant="ghost" className="h-7 px-2 flex items-center gap-1" onClick={saveDrawing}>
+          <Save className="w-4 h-4" />
+          Save
+        </Button>
       </div>
       <div className="flex">
         <div className="w-8 bg-gray-300 p-0.5 border-r-2 border-black">

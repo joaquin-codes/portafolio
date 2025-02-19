@@ -43,7 +43,7 @@
   }
 
   .window {
-    @apply neo-brutalist absolute min-w-[300px] overflow-hidden;
+    @apply neo-brutalist absolute min-w-[300px] min-h-[200px] overflow-hidden;
   }
 
   .window-header {

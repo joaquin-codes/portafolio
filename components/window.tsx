@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { X, Minus, Square } from "lucide-react"
 
 interface WindowProps {
@@ -18,32 +18,21 @@ interface WindowProps {
   onMaximize: () => void
   onFocus: () => void
   onMove: (id: string, x: number, y: number) => void
+  secondaryAccentColor: string
 }
 
-export default function Window({
-  id,
-  title,
-  children,
-  zIndex,
-  position,
-  isMinimized,
-  isMaximized,
-  onClose,
-  onMinimize,
-  onMaximize,
-  onFocus,
-  onMove,
-}: WindowProps) {
+export default function Window({ secondaryAccentColor, children, ...props }: WindowProps) {
   const windowRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
   const startPos = useRef({ x: 0, y: 0 })
+  const [position, setPosition] = useState(props.position)
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging.current && windowRef.current && !isMaximized) {
+      if (isDragging.current && windowRef.current && !props.isMaximized) {
         const newX = e.clientX - startPos.current.x
         const newY = e.clientY - startPos.current.y
-        onMove(id, newX, newY)
+        props.onMove(props.id, newX, newY)
       }
     }
 
@@ -58,7 +47,15 @@ export default function Window({
       window.removeEventListener("mousemove", handleMouseMove)
       window.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [id, onMove, isMaximized])
+  }, [props.id, props.isMaximized, props.onMove]) // Updated dependency array
+
+  useEffect(() => {
+    if (props.isMaximized) {
+      setPosition({ x: 0, y: 0 })
+    } else {
+      setPosition(props.position)
+    }
+  }, [props.isMaximized, props.position]) // Updated dependency array
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -67,46 +64,48 @@ export default function Window({
         x: e.clientX - position.x,
         y: e.clientY - position.y,
       }
-      onFocus()
+      props.onFocus()
     }
   }
 
-  if (isMinimized) {
+  if (props.isMinimized) {
     return null
   }
 
   return (
     <div
       ref={windowRef}
-      className={`window ${isMaximized ? "fixed inset-0 m-0" : ""}`}
+      className={`window ${props.isMaximized ? "fixed inset-0 m-0" : ""}`}
       style={{
-        left: isMaximized ? 0 : position.x,
-        top: isMaximized ? 0 : position.y,
-        zIndex,
-        width: isMaximized ? "100%" : undefined,
-        height: isMaximized ? "calc(100% - 48px)" : undefined,
+        left: position.x,
+        top: position.y,
+        zIndex: props.zIndex,
+        width: props.isMaximized ? "100%" : "auto",
+        height: props.isMaximized ? "calc(100% - 48px)" : "auto",
+        display: "flex",
+        flexDirection: "column",
       }}
-      onClick={onFocus}
+      onClick={props.onFocus}
     >
-      <div className="window-header" onMouseDown={handleMouseDown}>
-        <span className="font-bold">{title}</span>
+      <div className="window-header" style={{ backgroundColor: secondaryAccentColor }} onMouseDown={handleMouseDown}>
+        <span className="font-bold">{props.title}</span>
         <div className="flex gap-2">
           <button
-            onClick={onMinimize}
+            onClick={props.onMinimize}
             className="neo-brutalist-sm p-1 hover:translate-y-[1px] hover:shadow-[2px_1px_0px_0px_#000]
             active:translate-y-[2px] active:shadow-[1px_0px_0px_0px_#000] transition-all"
           >
             <Minus className="w-4 h-4" />
           </button>
           <button
-            onClick={onMaximize}
+            onClick={props.onMaximize}
             className="neo-brutalist-sm p-1 hover:translate-y-[1px] hover:shadow-[2px_1px_0px_0px_#000]
             active:translate-y-[2px] active:shadow-[1px_0px_0px_0px_#000] transition-all"
           >
             <Square className="w-4 h-4" />
           </button>
           <button
-            onClick={onClose}
+            onClick={props.onClose}
             className="neo-brutalist-sm p-1 hover:translate-y-[1px] hover:shadow-[2px_1px_0px_0px_#000]
             active:translate-y-[2px] active:shadow-[1px_0px_0px_0px_#000] transition-all"
           >
@@ -117,7 +116,8 @@ export default function Window({
       <div
         className="bg-white overflow-auto"
         style={{
-          height: isMaximized ? "calc(100% - 40px)" : undefined,
+          height: props.isMaximized ? "calc(100% - 40px)" : "300px", // Add default height
+          width: props.isMaximized ? "100%" : "400px", // Add default width
         }}
       >
         {children}
