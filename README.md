@@ -24,3 +24,5 @@ Frontend: React, Next.js, Tailwind CSS, ShadCN
 
 
 🌍 Live Demo: https://v0-portafolio-84-lmc2ni.vercel.app/
+
+Warning: It's still on Beta, it need's some work for mobile use.
