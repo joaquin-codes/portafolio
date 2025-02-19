@@ -1,6 +1,6 @@
 🖥️ Personal Portfolio
 
-
+![Portfolio Screenshot](app/page_screenshot.png)
 
 🚀 Overview
 
