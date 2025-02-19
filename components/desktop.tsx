@@ -293,22 +293,83 @@ function WindowContent({ type, setAccentColor }: { type: string; setAccentColor:
   switch (type) {
     case "AboutMe":
       return (
-        <div className="p-4">
-          <h2 className="text-xl mb-4">About Me</h2>
-          <p>Hello! I'm a developer who loves creating unique web experiences.</p>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-6">About Me</h2>
+          <div className="space-y-6">
+            <p className="text-lg">
+              Hi, I'm Joaquin, a Software Engineering student about to finish my degree at the European Atlantic
+              University in Spain. I'm passionate about Data Science and halfway through the Google Advanced Data
+              Science certificate. I recently founded an NGO focused on youth projects with the European Union. I'm now
+              seeking internships to apply my skills and grow in the field of Data Science.
+            </p>
+            <div>
+              <h3 className="text-xl font-bold mb-4">Skills</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p>• Python (Pandas, NumPy, Matplotlib, Scikit-Learn)</p>
+                  <p>• SQL (MySQL)</p>
+                  <p>• C#</p>
+                  <p>• Excel (Advanced formulas, PivotTables, Data Visualization)</p>
+                </div>
+                <div className="space-y-2">
+                  <p>• Power BI</p>
+                  <p>• Machine Learning (Supervised & Unsupervised)</p>
+                  <p>• Statistical Analysis & Data Modeling</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    case "Contact":
+      return (
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-6">Contact Me</h2>
+          <div className="space-y-4">
+            <p className="text-xl font-bold">JOAQUIN RODRIGUEZ</p>
+            <div className="space-y-2">
+              <p>
+                <span className="font-semibold">Phone:</span>{" "}
+                <a href="tel:+34602472374" className="hover:underline">
+                  +34 602472374
+                </a>
+              </p>
+              <p>
+                <span className="font-semibold">Email:</span>{" "}
+                <a href="mailto:joaquin00rf@gmail.com" className="hover:underline">
+                  joaquin00rf@gmail.com
+                </a>
+              </p>
+              <p>
+                <span className="font-semibold">GitHub:</span>{" "}
+                <a
+                  href="https://github.com/joaquin-codes"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  github.com/joaquin-codes
+                </a>
+              </p>
+              <p>
+                <span className="font-semibold">LinkedIn:</span>{" "}
+                <a
+                  href="https://linkedin.com/in/joaquin-codes/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  linkedin.com/in/joaquin-codes/
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
       )
     case "Projects":
       return <ProjectsContent />
     case "Paint":
       return <Paint />
-    case "Contact":
-      return (
-        <div className="p-4">
-          <h2 className="text-xl mb-4">Contact Me</h2>
-          <p>Email: example@example.com</p>
-        </div>
-      )
     case "Settings":
       return <SettingsContent setAccentColor={setAccentColor} />
     case "Drawings":

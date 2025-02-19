@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button"
 
 const projects = [
   {
+    title: "Data Cleaning And Exploring with SQL",
+    description:
+      "This repository showcases practical applications of SQL for data cleaning and exploration tasks. It focuses on a real-world dataset related to layoffs sourced from publicly available CSV files.",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rqq5K7GPMGNXu168Z7GzgOssG1Ajl5.png",
+    github: "https://github.com/joaquin-codes/sql-data-cleaning",
+    technologies: ["SQL", "MySQL", "Data Analysis", "Data Cleaning"],
+  },
+  {
     title: "Optical Character Recognition",
     description:
       "A foundational OCR system built from scratch for identifying handwritten characters. Uses core image processing techniques and template matching to recognize uppercase letters, lowercase letters, and numbers. Perfect for educational purposes and understanding OCR principles.",
@@ -12,7 +20,6 @@ const projects = [
     github: "https://github.com/joaquin-codes/Optical-Character-Recognition",
     technologies: ["Python", "OpenCV", "NumPy", "Image Processing"],
   },
-  // Add more projects as needed
 ]
 
 export default function ProjectsContent() {
@@ -28,7 +35,7 @@ export default function ProjectsContent() {
                   <img
                     src={project.image || "/placeholder.svg"}
                     alt={project.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-white p-4"
                   />
                 </div>
               </div>
