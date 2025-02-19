@@ -43,42 +43,68 @@ export default function Paint() {
   const [color, setColor] = useState("#000000")
   const [tool, setTool] = useState("brush")
   const { addFile } = useDesktop()
+  const [lastPos, setLastPos] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
     const context = canvas?.getContext("2d")
-    if (context) {
+    if (context && canvas) {
+      // Set canvas size to match container
+      canvas.width = 800
+      canvas.height = 600
       context.fillStyle = "#FFFFFF"
       context.fillRect(0, 0, canvas.width, canvas.height)
     }
   }, [])
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getCanvasPoint = (e: React.TouchEvent | React.MouseEvent) => {
     const canvas = canvasRef.current
-    const context = canvas?.getContext("2d")
-    if (context) {
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      context.beginPath()
-      context.moveTo(x, y)
-      setIsDrawing(true)
+    if (!canvas) return null
+
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+
+    if ("touches" in e) {
+      const touch = e.touches[0]
+      return {
+        x: (touch.clientX - rect.left) * scaleX,
+        y: (touch.clientY - rect.top) * scaleY,
+      }
+    } else {
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY,
+      }
     }
   }
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return
-    const canvas = canvasRef.current
-    const context = canvas?.getContext("2d")
+  const startDrawing = (e: React.TouchEvent | React.MouseEvent) => {
+    const point = getCanvasPoint(e)
+    if (!point) return
+
+    const context = canvasRef.current?.getContext("2d")
     if (context) {
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      context.lineTo(x, y)
+      setIsDrawing(true)
+      setLastPos(point)
+      context.beginPath()
+      context.moveTo(point.x, point.y)
+    }
+  }
+
+  const draw = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDrawing) return
+    const point = getCanvasPoint(e)
+    if (!point) return
+
+    const context = canvasRef.current?.getContext("2d")
+    if (context) {
+      context.lineTo(point.x, point.y)
       context.strokeStyle = tool === "eraser" ? "#FFFFFF" : color
       context.lineWidth = tool === "eraser" ? 20 : 2
       context.lineCap = "round"
       context.stroke()
+      setLastPos(point)
     }
   }
 
@@ -89,21 +115,35 @@ export default function Paint() {
   const saveDrawing = () => {
     const canvas = canvasRef.current
     if (canvas) {
-      const dataUrl = canvas.toDataURL()
-      const name = `Drawing ${new Date().toLocaleString()}`
-      addFile({
-        name,
-        type: "drawing",
-        content: dataUrl,
-      })
-      alert("Drawing saved successfully!")
+      // Create a temporary canvas to handle the background
+      const tempCanvas = document.createElement("canvas")
+      tempCanvas.width = canvas.width
+      tempCanvas.height = canvas.height
+      const tempCtx = tempCanvas.getContext("2d")
+
+      if (tempCtx) {
+        // Fill white background
+        tempCtx.fillStyle = "#FFFFFF"
+        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+        // Draw the original canvas content
+        tempCtx.drawImage(canvas, 0, 0)
+
+        const dataUrl = tempCanvas.toDataURL()
+        const name = `Drawing ${new Date().toLocaleString()}`
+        addFile({
+          name,
+          type: "drawing",
+          content: dataUrl,
+        })
+        alert("Drawing saved successfully!")
+      }
     }
   }
 
   return (
-    <div className="bg-gray-200 border-2 border-black">
+    <div className="bg-gray-200 border-2 border-black w-full h-full flex flex-col">
       <div className="bg-gray-300 px-2 py-1 text-sm border-b-2 border-black flex justify-between items-center">
-        <div>
+        <div className="hidden sm:flex">
           <span className="mr-4">File</span>
           <span className="mr-4">Edit</span>
           <span className="mr-4">View</span>
@@ -116,7 +156,7 @@ export default function Paint() {
           Save
         </Button>
       </div>
-      <div className="flex">
+      <div className="flex flex-1 min-h-0">
         <div className="w-8 bg-gray-300 p-0.5 border-r-2 border-black">
           <Button
             variant="ghost"
@@ -157,19 +197,21 @@ export default function Paint() {
             </svg>
           </Button>
         </div>
-        <div className="flex-grow overflow-auto border-2 border-black" style={{ width: "724px", height: "500px" }}>
+        <div className="flex-1 relative bg-white">
           <canvas
             ref={canvasRef}
-            width={2000}
-            height={2000}
+            className="absolute top-0 left-0 w-full h-full"
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseOut={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
           />
         </div>
       </div>
-      <div className="flex bg-gray-300 p-1 border-t-2 border-black">
+      <div className="flex bg-gray-300 p-1 border-t-2 border-black overflow-x-auto">
         <div className="flex flex-wrap gap-1">
           {colors.map((c) => (
             <Button
@@ -182,7 +224,7 @@ export default function Paint() {
           ))}
         </div>
       </div>
-      <div className="bg-gray-300 px-2 py-1 text-sm border-t-2 border-black">
+      <div className="bg-gray-300 px-2 py-1 text-sm border-t-2 border-black hidden sm:block">
         For Help, click Help Topics on the Help Menu.
       </div>
     </div>
