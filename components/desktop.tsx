@@ -119,13 +119,34 @@ function DesktopContent() {
 
   const openWindow = useCallback(
     (id: string) => {
-      const newZIndex = maxZIndex + 1
-      setMaxZIndex(newZIndex)
-      setWindows((prev) =>
-        prev.map((window) =>
-          window.id === id ? { ...window, isOpen: true, isMinimized: false, zIndex: newZIndex } : window,
-        ),
-      )
+      setWindows((prev) => {
+        const existingWindowIndex = prev.findIndex((window) => window.id === id)
+        if (existingWindowIndex !== -1) {
+          // Window exists, update its state
+          const newZIndex = maxZIndex + 1
+          setMaxZIndex(newZIndex)
+          return prev.map((window, index) =>
+            index === existingWindowIndex ? { ...window, isOpen: true, isMinimized: false, zIndex: newZIndex } : window,
+          )
+        } else {
+          // Window doesn't exist, create a new one
+          const newZIndex = maxZIndex + 1
+          setMaxZIndex(newZIndex)
+          return [
+            ...prev,
+            {
+              id,
+              title: id.charAt(0).toUpperCase() + id.slice(1),
+              isOpen: true,
+              isMinimized: false,
+              isMaximized: false,
+              zIndex: newZIndex,
+              component: id,
+              position: { x: 100, y: 100 },
+            },
+          ]
+        }
+      })
     },
     [maxZIndex],
   )
@@ -166,16 +187,17 @@ function DesktopContent() {
     )
   }, [])
 
-  const bringToFront = useCallback(
-    (id: string) => {
-      const newZIndex = maxZIndex + 1
-      setMaxZIndex(newZIndex)
+  const bringToFront = useCallback((id: string) => {
+    setMaxZIndex((prevZIndex) => {
+      const newZIndex = prevZIndex + 1
       setWindows((prev) =>
-        prev.map((window) => (window.id === id ? { ...window, zIndex: newZIndex, isMinimized: false } : window)),
+        prev.map((window) =>
+          window.id === id ? { ...window, zIndex: newZIndex, isMinimized: false, isOpen: true } : window,
+        ),
       )
-    },
-    [maxZIndex],
-  )
+      return newZIndex
+    })
+  }, [])
 
   const updateWindowPosition = useCallback((id: string, x: number, y: number) => {
     setWindows((prev) => prev.map((window) => (window.id === id ? { ...window, position: { x, y } } : window)))
@@ -245,7 +267,8 @@ function DesktopContent() {
             if (window.isMinimized) {
               bringToFront(id)
             } else {
-              minimizeWindow(id)
+              // If the window is already open and not minimized, just bring it to front
+              bringToFront(id)
             }
           } else {
             openWindow(id)

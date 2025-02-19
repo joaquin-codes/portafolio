@@ -1,42 +1,36 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, User, Palette, FolderGit2, Mail, Settings, Power } from "lucide-react"
-
-interface TaskbarProps {
-  windows: Array<{
-    id: string
-    title: string
-    isOpen: boolean
-    isMinimized: boolean
-  }>
-  onWindowClick: (id: string) => void
-  accentColor: string
-}
+import { Menu, Power, User, Palette, FolderGit2, Mail, Settings } from "lucide-react"
+import type { TaskbarProps } from "@/types"
 
 export default function Taskbar({ windows, onWindowClick, accentColor }: TaskbarProps) {
-  const [time, setTime] = useState(new Date())
+  const [mounted, setMounted] = useState(false)
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [isStartOpen, setIsStartOpen] = useState(false)
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(new Date())
-    }, 1000)
+    setMounted(true)
+    const updateDateTime = () => setCurrentTime(new Date())
+    updateDateTime() // Initial update
+    const timer = setInterval(updateDateTime, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (!target.closest(".start-menu") && !target.closest(".start-button")) {
         setIsStartOpen(false)
       }
     }
-
     window.addEventListener("click", handleClickOutside)
-
-    return () => {
-      clearInterval(timer)
-      window.removeEventListener("click", handleClickOutside)
-    }
+    return () => window.removeEventListener("click", handleClickOutside)
   }, [])
+
+  if (!mounted || !currentTime) {
+    return null
+  }
 
   const startMenuItems = [
     { id: "about", icon: User, label: "About Me" },
@@ -60,7 +54,7 @@ export default function Taskbar({ windows, onWindowClick, accentColor }: Taskbar
                   setIsStartOpen(false)
                 }}
               >
-                <item.icon className="w-5 h-5" style={{ color: accentColor }} />
+                {item.icon && <item.icon className="w-5 h-5" style={{ color: accentColor }} />}
                 <span>{item.label}</span>
               </button>
             ))}
@@ -98,8 +92,8 @@ export default function Taskbar({ windows, onWindowClick, accentColor }: Taskbar
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="neo-brutalist-sm px-3 py-1 text-sm">{time.toLocaleTimeString()}</div>
-          <div className="neo-brutalist-sm px-3 py-1 text-sm">{time.toLocaleDateString()}</div>
+          <div className="neo-brutalist-sm px-3 py-1 text-sm">{currentTime.toLocaleTimeString()}</div>
+          <div className="neo-brutalist-sm px-3 py-1 text-sm">{currentTime.toLocaleDateString()}</div>
         </div>
       </div>
     </>
