@@ -1,20 +1,53 @@
-Desktop Portfolio
-Welcome to my interactive desktop-style portfolio! This project is a unique and engaging way to showcase my work and skills. Built using modern web technologies, this portfolio mimics a computer desktop, complete with usable icons and applications, including a functional Paint app!
+🖥️ Personal Portfolio
 
-Features
-Interactive Desktop Interface: Navigate through a desktop-like environment with clickable icons and applications.
 
-Customizable Appearance: Change the website's colors and wallpaper to suit your preferences.
 
-Functional Paint Application: Draw your own artwork directly on the website and set it as your desktop background.
+🚀 Overview
 
-Responsive Design: Ensures a seamless experience across various devices and screen sizes.
+This is my personal portfolio website designed to showcase my projects, skills, and creativity. Inspired by classic operating systems, the site looks like a desktop environment, featuring interactive applications such as Paint, customizable themes, and wallpapers.
 
-Technologies Used
-React: A JavaScript library for building user interfaces.
+✨ Features
 
-Next.js: A React framework for server-side rendering and static site generation.
+💻 Desktop-like Interface – A fully interactive UI with draggable windows and icons.
 
-Tailwind CSS: A utility-first CSS framework for rapid UI development.
+🎨 Paint App – Draw your own masterpiece and set it as your desktop wallpaper.
 
-ShadCn: A collection of reusable components for building modern web applications.
+🎭 Theme Customization – Change window colors and personalize your experience.
+
+🖼️ Wallpaper Selection – Choose from various pixel-art backgrounds.
+
+🗂️ Usable Icons & Apps – Explore different sections like About, Projects, and Contact.
+
+🛠️ Tech Stack
+
+Frontend: React, Next.js, Tailwind CSS, ShadCN
+
+State Management: React Context API
+
+UI Components: Custom-built UI resembling classic OS aesthetics
+
+📸 Screenshot
+
+
+
+📦 Installation & Usage
+
+To run this project locally, follow these steps:
+
+# Clone the repository
+git clone https://github.com/yourusername/portfolio-desktop.git
+
+# Navigate to the project folder
+cd portfolio-desktop
+
+# Install dependencies
+yarn install  # or npm install
+
+# Run the development server
+yarn dev  # or npm run dev
+
+Then open http://localhost:3000/ in your browser.
+
+🌍 Live Demo: https://v0-portafolio-84-lmc2ni.vercel.app/
+
+Check out the live version of the portfolio here: Your Website URL
