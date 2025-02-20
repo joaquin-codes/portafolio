@@ -1,5 +1,7 @@
 🖥️ Personal Portfolio
 
+🌍 Live Demo: [https://v0-portafolio-84-lmc2ni.vercel.app/](https://v0-portafolio-84.vercel.app/)
+
 ![Portfolio Screenshot](app/page_screenshot.png)
 
 🚀 Overview
@@ -22,7 +24,4 @@ This is my personal portfolio website designed to showcase my projects, skills, 
 
 Frontend: React, Next.js, Tailwind CSS, ShadCN
 
-
-🌍 Live Demo: https://v0-portafolio-84-lmc2ni.vercel.app/
-
-Warning: It's still on Beta, it need's some work for mobile use.
+Warning: It's still on Beta.
