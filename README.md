@@ -1,6 +1,6 @@
 🖥️ Personal Portfolio
 
-
+![Portfolio Screenshot](app/page_screenshot.png)
 
 🚀 Overview
 
@@ -22,32 +22,7 @@ This is my personal portfolio website designed to showcase my projects, skills, 
 
 Frontend: React, Next.js, Tailwind CSS, ShadCN
 
-State Management: React Context API
-
-UI Components: Custom-built UI resembling classic OS aesthetics
-
-📸 Screenshot
-
-
-
-📦 Installation & Usage
-
-To run this project locally, follow these steps:
-
-# Clone the repository
-git clone https://github.com/yourusername/portfolio-desktop.git
-
-# Navigate to the project folder
-cd portfolio-desktop
-
-# Install dependencies
-yarn install  # or npm install
-
-# Run the development server
-yarn dev  # or npm run dev
-
-Then open http://localhost:3000/ in your browser.
 
 🌍 Live Demo: https://v0-portafolio-84-lmc2ni.vercel.app/
 
-Check out the live version of the portfolio here: Your Website URL
+Warning: It's still on Beta, it need's some work for mobile use.
