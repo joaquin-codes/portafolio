@@ -29,7 +29,8 @@ export default function DesktopIcon({
   const startPos = useRef({ x: 0, y: 0 })
   const [isMobile, setIsMobile] = useState(false)
   const touchTimeout = useRef<NodeJS.Timeout>()
-  const lastTap = useRef(0)
+  const lastTapTime = useRef(0)
+  const [position, setPosition] = useState({ left, top })
 
   useEffect(() => {
     const checkMobile = () => {
@@ -41,134 +42,158 @@ export default function DesktopIcon({
   }, [])
 
   useEffect(() => {
+    setPosition({ left, top })
+  }, [left, top])
+
+  useEffect(() => {
     const icon = iconRef.current
     if (!icon) return
 
-    const handleStart = (e: MouseEvent | TouchEvent) => {
-      if ("touches" in e) {
-        // Touch events
-        const touch = e.touches[0]
-        startPos.current = {
-          x: touch.clientX - icon.offsetLeft,
-          y: touch.clientY - icon.offsetTop,
-        }
-
-        // Set a timeout for long press
-        touchTimeout.current = setTimeout(() => {
-          isDragging.current = true
-          icon.style.opacity = "0.7"
-        }, 500)
-      } else {
-        // Mouse events
-        isDragging.current = true
-        startPos.current = {
-          x: e.clientX - icon.offsetLeft,
-          y: e.clientY - icon.offsetTop,
-        }
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault() // Prevent default touch behavior
+      const touch = e.touches[0]
+      startPos.current = {
+        x: touch.clientX - position.left,
+        y: touch.clientY - position.top,
       }
 
-      icon.style.zIndex = "1000"
-      icon.style.transition = "none"
+      // Set up long press detection
+      touchTimeout.current = setTimeout(() => {
+        isDragging.current = true
+        icon.style.opacity = "0.7"
+      }, 500)
+
+      // Handle single/double tap
+      const now = Date.now()
+      const timeSinceLastTap = now - lastTapTime.current
+      if (timeSinceLastTap < 300) {
+        // Double tap detected
+        clearTimeout(touchTimeout.current)
+        isDragging.current = false
+        onDoubleClick()
+      } else if (isMobile) {
+        // Single tap on mobile
+        clearTimeout(touchTimeout.current)
+        touchTimeout.current = setTimeout(() => {
+          if (!isDragging.current) {
+            onDoubleClick()
+          }
+        }, 300)
+      }
+      lastTapTime.current = now
     }
 
-    const handleMove = (e: MouseEvent | TouchEvent) => {
+    const handleTouchMove = (e: TouchEvent) => {
       if (!isDragging.current) return
 
-      let clientX, clientY
-      if ("touches" in e) {
-        const touch = e.touches[0]
-        clientX = touch.clientX
-        clientY = touch.clientY
-      } else {
-        clientX = e.clientX
-        clientY = e.clientY
-      }
-
-      const newLeft = clientX - startPos.current.x
-      const newTop = clientY - startPos.current.y
+      const touch = e.touches[0]
+      const newLeft = touch.clientX - startPos.current.x
+      const newTop = touch.clientY - startPos.current.y
 
       // Prevent dragging outside viewport
       const maxX = window.innerWidth - icon.offsetWidth
-      const maxY = window.innerHeight - icon.offsetHeight
+      const maxY = window.innerHeight - icon.offsetHeight - 48 // Account for taskbar
 
       const boundedLeft = Math.max(0, Math.min(newLeft, maxX))
       const boundedTop = Math.max(0, Math.min(newTop, maxY))
 
-      icon.style.left = `${boundedLeft}px`
-      icon.style.top = `${boundedTop}px`
+      setPosition({ left: boundedLeft, top: boundedTop })
     }
 
-    const handleEnd = (e: MouseEvent | TouchEvent) => {
+    const handleTouchEnd = () => {
       if (touchTimeout.current) {
         clearTimeout(touchTimeout.current)
       }
 
-      if (!isDragging.current) {
-        if ("changedTouches" in e && isMobile) {
-          // Handle single tap on mobile
-          const now = Date.now()
-          const timeDiff = now - lastTap.current
-          if (timeDiff < 300) {
-            // Double tap detected
-            e.preventDefault()
-          } else {
-            onDoubleClick()
-          }
-          lastTap.current = now
-        }
-      } else {
-        const rect = icon.getBoundingClientRect()
-        onDragEnd(id, rect.left, rect.top)
+      if (isDragging.current) {
+        onDragEnd(id, position.left, position.top)
+        isDragging.current = false
+        icon.style.opacity = "1"
       }
-
-      isDragging.current = false
-      icon.style.opacity = "1"
-      icon.style.zIndex = ""
-      icon.style.transition = ""
     }
 
-    // Mouse events
-    icon.addEventListener("mousedown", handleStart)
-    window.addEventListener("mousemove", handleMove)
-    window.addEventListener("mouseup", handleEnd)
+    const handleMouseDown = (e: MouseEvent) => {
+      if (isMobile) return // Ignore mouse events on mobile
+      isDragging.current = true
+      startPos.current = {
+        x: e.clientX - position.left,
+        y: e.clientY - position.top,
+      }
+      icon.style.opacity = "0.7"
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || isMobile) return
+
+      const newLeft = e.clientX - startPos.current.x
+      const newTop = e.clientY - startPos.current.y
+
+      // Prevent dragging outside viewport
+      const maxX = window.innerWidth - icon.offsetWidth
+      const maxY = window.innerHeight - icon.offsetHeight - 48 // Account for taskbar
+
+      const boundedLeft = Math.max(0, Math.min(newLeft, maxX))
+      const boundedTop = Math.max(0, Math.min(newTop, maxY))
+
+      setPosition({ left: boundedLeft, top: boundedTop })
+    }
+
+    const handleMouseUp = () => {
+      if (isDragging.current) {
+        onDragEnd(id, position.left, position.top)
+        isDragging.current = false
+        icon.style.opacity = "1"
+      }
+    }
 
     // Touch events
-    icon.addEventListener("touchstart", handleStart, { passive: true })
-    window.addEventListener("touchmove", handleMove, { passive: false })
-    window.addEventListener("touchend", handleEnd)
+    icon.addEventListener("touchstart", handleTouchStart, { passive: false })
+    window.addEventListener("touchmove", handleTouchMove, { passive: true })
+    window.addEventListener("touchend", handleTouchEnd)
+
+    // Mouse events (desktop only)
+    if (!isMobile) {
+      icon.addEventListener("mousedown", handleMouseDown)
+      window.addEventListener("mousemove", handleMouseMove)
+      window.addEventListener("mouseup", handleMouseUp)
+    }
 
     return () => {
-      icon.removeEventListener("mousedown", handleStart)
-      window.removeEventListener("mousemove", handleMove)
-      window.removeEventListener("mouseup", handleEnd)
+      icon.removeEventListener("touchstart", handleTouchStart)
+      window.removeEventListener("touchmove", handleTouchMove)
+      window.removeEventListener("touchend", handleTouchEnd)
 
-      icon.removeEventListener("touchstart", handleStart)
-      window.removeEventListener("touchmove", handleMove)
-      window.removeEventListener("touchend", handleEnd)
+      if (!isMobile) {
+        icon.removeEventListener("mousedown", handleMouseDown)
+        window.removeEventListener("mousemove", handleMouseMove)
+        window.removeEventListener("mouseup", handleMouseUp)
+      }
 
       if (touchTimeout.current) {
         clearTimeout(touchTimeout.current)
       }
     }
-  }, [id, onDragEnd, onDoubleClick, isMobile])
+  }, [id, onDragEnd, onDoubleClick, isMobile, position])
 
   return (
     <div
       ref={iconRef}
       className="desktop-icon absolute touch-none"
       style={{
-        left,
-        top,
+        left: position.left,
+        top: position.top,
       }}
       onDoubleClick={isMobile ? undefined : onDoubleClick}
     >
       <div
-        className="neo-brutalist-sm w-12 h-12 flex items-center justify-center"
+        className="neo-brutalist-sm w-14 h-14 flex items-center justify-center"
         style={{ backgroundColor: accentColor }}
       >
-        <Icon className="w-6 h-6 text-white" />
+        <Icon className="w-7 h-7 text-white" />
       </div>
-      <span className="text-sm font-medium bg-white/80 px-2 rounded">{label}</span>
+      <span className="text-sm font-medium bg-white/80 px-2 rounded text-center max-w-[120px] line-clamp-2">
+        {label}
+      </span>
     </div>
   )
 }
